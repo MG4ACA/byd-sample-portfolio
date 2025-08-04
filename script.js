@@ -94,7 +94,7 @@ class BYDPortfolio {
 
   init() {
     this.setupEventListeners();
-    this.updateProgress();
+    this.updateView(); // Ensure initial section is properly displayed
     this.animateTitle();
   }
 
@@ -230,15 +230,15 @@ class BYDPortfolio {
   }
 
   updateBackgroundVisibility() {
-    const animatedBackground = document.querySelector('.animated-background');
+    const animatedBackground = document.querySelector(".animated-background");
     const currentSection = this.sections[this.currentSection];
-    
-    if (currentSection === 'seal') {
+
+    if (currentSection === "seal") {
       // Hide main background elements for SEAL section
-      animatedBackground.style.opacity = '0';
+      animatedBackground.style.opacity = "0";
     } else {
       // Show main background elements for other sections
-      animatedBackground.style.opacity = '1';
+      animatedBackground.style.opacity = "1";
     }
   }
 
@@ -263,16 +263,19 @@ class BYDPortfolio {
   }
 
   updateCarShowcase() {
+    // Each section already has the correct car image in HTML
+    // We just need to ensure proper visibility and transitions
     const heroCarImage = document.querySelector(".hero-section .car-image");
-    const carImages = [
-      "images/byd-atto-3.png",
-      "images/byd-atto-3.png",
-      "images/byd-emax-7.webp",
-      "images/byd-seal.png",
-      "images/byd-sealion-7.webp",
-    ];
 
-    if (heroCarImage && this.currentSection === 0) {
+    if (heroCarImage) {
+      const carImages = [
+        "images/byd-atto-3.png", // Hero section
+        "images/byd-atto-3.png", // ATTO 3 section
+        "images/byd-emax-7.webp", // eMAX 7 section
+        "images/byd-seal.png", // SEAL section
+        "images/byd-sealion-7.webp", // SEALION 7 section
+      ];
+
       heroCarImage.style.opacity = "0";
       setTimeout(() => {
         heroCarImage.src = carImages[this.currentSection];
@@ -304,11 +307,11 @@ class BYDPortfolio {
   }
 }
 
-// Enhanced grass animation
+//Enhanced grass animation
 class GrasslandAnimator {
   constructor() {
     this.createAdditionalGrass();
-    this.createButterflies();
+    this.createVantaBirds();
     this.animateWind();
   }
 
@@ -327,63 +330,38 @@ class GrasslandAnimator {
     }
   }
 
-  createButterflies() {
-    const background = document.querySelector(".animated-background");
-
-    for (let i = 0; i < 3; i++) {
-      const butterfly = document.createElement("div");
-      butterfly.className = "butterfly";
-      butterfly.style.cssText = `
-                position: absolute;
-                width: 20px;
-                height: 15px;
-                left: ${Math.random() * 100}%;
-                top: ${20 + Math.random() * 60}%;
-                animation: butterfly-flight ${8 + Math.random() * 4}s ease-in-out infinite;
-                animation-delay: ${Math.random() * 5}s;
-                z-index: 10;
-            `;
-
-      butterfly.innerHTML = `
-                <div style="
-                    width: 8px;
-                    height: 8px;
-                    background: #ff6b9d;
-                    border-radius: 50% 50% 0 50%;
-                    position: absolute;
-                    left: 0;
-                    animation: wing-flap 0.3s ease-in-out infinite;
-                "></div>
-                <div style="
-                    width: 8px;
-                    height: 8px;
-                    background: #ff8cc8;
-                    border-radius: 50% 50% 50% 0;
-                    position: absolute;
-                    right: 0;
-                    animation: wing-flap 0.3s ease-in-out infinite reverse;
-                "></div>
-            `;
-
-      background.appendChild(butterfly);
-    }
-
-    // Add butterfly animation styles
-    const style = document.createElement("style");
-    style.textContent = `
-            @keyframes butterfly-flight {
-                0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
-                25% { transform: translateX(100px) translateY(-20px) rotate(5deg); }
-                50% { transform: translateX(200px) translateY(10px) rotate(-3deg); }
-                75% { transform: translateX(150px) translateY(-15px) rotate(2deg); }
-            }
-            
-            @keyframes wing-flap {
-                0%, 100% { transform: scaleY(1); }
-                50% { transform: scaleY(0.3); }
-            }
-        `;
-    document.head.appendChild(style);
+  createVantaBirds() {
+    // Wait for Vanta to be fully loaded
+    setTimeout(() => {
+      if (typeof VANTA !== "undefined" && VANTA.BIRDS) {
+        this.vantaEffect = VANTA.BIRDS({
+          el: "#vanta-birds-bg",
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.0,
+          minWidth: 200.0,
+          scale: 1.0,
+          scaleMobile: 1.0,
+          backgroundColor: 0x0,
+          color1: 0x7cb342,
+          color2: 0x8bc34a,
+          colorMode: "lerp",
+          birdSize: 1.5,
+          wingSpan: 25.0,
+          speedLimit: 5.0,
+          separation: 20.0,
+          alignment: 20.0,
+          cohesion: 20.0,
+          quantity: 2.0,
+        });
+        // Store globally for performance optimization
+        window.vantaEffect = this.vantaEffect;
+      } else {
+        console.log("Vanta.js not loaded yet, retrying...");
+        setTimeout(() => this.createVantaBirds(), 500);
+      }
+    }, 100);
   }
 
   animateWind() {
@@ -503,17 +481,25 @@ class PerformanceOptimizer {
   optimizeAnimations() {
     // Pause animations when tab is not visible
     document.addEventListener("visibilitychange", () => {
-      const animatedElements = document.querySelectorAll(
-        ".grass, .flower, .particle, .butterfly, .cloud"
-      );
+      const animatedElements = document.querySelectorAll(".grass, .flower, .particle, .cloud");
       if (document.hidden) {
         animatedElements.forEach((el) => {
           el.style.animationPlayState = "paused";
         });
+        // Pause Vanta effect if it exists
+        if (window.vantaEffect) {
+          window.vantaEffect.destroy();
+        }
       } else {
         animatedElements.forEach((el) => {
           el.style.animationPlayState = "running";
         });
+        // Restart Vanta effect when tab becomes visible
+        if (!window.vantaEffect && typeof VANTA !== "undefined") {
+          setTimeout(() => {
+            new GrasslandAnimator();
+          }, 100);
+        }
       }
     });
   }
