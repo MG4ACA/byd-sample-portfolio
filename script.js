@@ -226,6 +226,20 @@ class BYDPortfolio {
     this.updateProgress();
     this.updateNavigation();
     this.updateCarShowcase();
+    this.updateBackgroundVisibility();
+  }
+
+  updateBackgroundVisibility() {
+    const animatedBackground = document.querySelector('.animated-background');
+    const currentSection = this.sections[this.currentSection];
+    
+    if (currentSection === 'seal') {
+      // Hide main background elements for SEAL section
+      animatedBackground.style.opacity = '0';
+    } else {
+      // Show main background elements for other sections
+      animatedBackground.style.opacity = '1';
+    }
   }
 
   updateProgress() {
