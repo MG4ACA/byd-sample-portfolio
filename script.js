@@ -1,3 +1,86 @@
+// Advanced Particle Animation System
+class ParticleSystem {
+  constructor() {
+    this.particleCount = 80;
+    this.particles = [];
+    this.container = document.getElementById("particle-container");
+    this.init();
+  }
+
+  init() {
+    this.createParticles();
+    this.generateCSS();
+  }
+
+  createParticles() {
+    for (let i = 1; i <= this.particleCount; i++) {
+      const particle = document.createElement("div");
+      particle.className = "circle-container";
+
+      const circle = document.createElement("div");
+      circle.className = "circle";
+
+      particle.appendChild(circle);
+      this.container.appendChild(particle);
+
+      // Generate random properties
+      const size = Math.floor(Math.random() * 8) + 3; // 3-10px
+      const duration = 28000 + Math.random() * 9000; // 28-37s
+      const delay = Math.random() * 37000; // 0-37s
+      const circleDelay = Math.random() * 4000; // 0-4s
+
+      // Store particle data
+      this.particles.push({
+        element: particle,
+        circle: circle,
+        size: size,
+        duration: duration,
+        delay: delay,
+        circleDelay: circleDelay,
+        startX: Math.random() * 100,
+        endX: Math.random() * 100,
+        startY: 100 + Math.random() * 10,
+        endY: -120 - Math.random() * 30,
+      });
+    }
+  }
+
+  generateCSS() {
+    let css = "";
+
+    this.particles.forEach((particle, index) => {
+      const i = index + 1;
+
+      // Set particle size and animation
+      particle.element.style.width = `${particle.size}px`;
+      particle.element.style.height = `${particle.size}px`;
+      particle.element.style.animationName = `move-frames-${i}`;
+      particle.element.style.animationDuration = `${particle.duration}ms`;
+      particle.element.style.animationDelay = `${particle.delay}ms`;
+
+      // Set circle animation delay
+      particle.circle.style.animationDelay = `${particle.circleDelay}ms`;
+
+      // Generate keyframes for this particle
+      css += `
+        @keyframes move-frames-${i} {
+          from {
+            transform: translate3d(${particle.startX}vw, ${particle.startY}vh, 0);
+          }
+          to {
+            transform: translate3d(${particle.endX}vw, ${particle.endY}vh, 0);
+          }
+        }
+      `;
+    });
+
+    // Inject CSS
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+}
+
 class BYDPortfolio {
   constructor() {
     this.currentSection = 0;
@@ -440,6 +523,7 @@ class PerformanceOptimizer {
 
 // Initialize everything when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
+  new ParticleSystem(); // Initialize the particle system first
   new BYDPortfolio();
   new GrasslandAnimator();
   new WeatherEffects();
